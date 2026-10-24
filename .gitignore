@@ -1,0 +1,19 @@
+# CMake build output folder
+build/
+bin/
+
+# Compiled binaries and libraries
+*.o
+*.obj
+*.exe
+*.out
+kronos_server
+
+# Editor / IDE metadata
+.vscode/
+.idea/
+*.swp
+
+# OS-specific clutter
+.DS_Store
+Thumbs.db
