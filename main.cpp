@@ -1,4 +1,5 @@
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include "engine.hpp"
 #include <string>
@@ -20,7 +21,7 @@ int main(){
 
     //Test 1 thread doing 100.000 writes
     {
-        Engine db_1("test1");
+        Engine db_1("test1", 1);
 
         auto start = std::chrono::high_resolution_clock::now();
         worker(db_1, 0, TOTAL_OPS);
@@ -31,15 +32,16 @@ int main(){
         std::cout << "1 Thread - " << TOTAL_OPS << " operations in " << ms << " ms.\n";
     
     }
-    //Test 4 threads doing 25.000 writes each (100k total)
+    //Test 16 threads doing 6.2k writes each (100k total) and having 16 shards
     {
-        const int THREAD_COUNT = 4;
+        const int THREAD_COUNT = 16;
         const int OP_PER_THREAD = TOTAL_OPS / THREAD_COUNT;
         std::vector<std::thread> threads;
-        Engine db_2("test2");
+        Engine db_2("test2", 16);
 
         auto start = std::chrono::high_resolution_clock::now();
 
+        //Emplace back compared to pushback will construct the object directly in the vector instead of taking an already constructed object and moving it
         for(int i = 0; i < THREAD_COUNT; i++){
             threads.emplace_back(worker, std::ref(db_2), i, OP_PER_THREAD);
         }
@@ -50,7 +52,7 @@ int main(){
 
         auto end = std::chrono::high_resolution_clock::now();
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        std::cout << "4 Threads - " << TOTAL_OPS << " operations in " << ms << " ms.\n";
+        std::cout << THREAD_COUNT << " Threads - " << TOTAL_OPS << " operations in " << ms << " ms.\n";
 
 
     }

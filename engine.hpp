@@ -2,14 +2,16 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 class Engine{
 public:
-    Engine(std::string const & name);
+    Engine(std::string const & name, size_t num_shards);
 
     void start();
 
@@ -21,6 +23,15 @@ public:
     size_t size() const;
 private:
     std::string db_name;
-    std::unordered_map<std::string, std::string> storage;
-    std::mutex db_mutex;
+
+    struct Shard{
+        std::mutex mtx;
+        std::unordered_map<std::string, std::string> map;
+    };
+    size_t shard_count;
+    //mutexes cannot be copied or moved in memory, they are tethered, thats why we have to use pointer
+    std::vector<std::unique_ptr<Shard>> shards;
+    
+    size_t get_shard_idx(std::string key);
+
 };
