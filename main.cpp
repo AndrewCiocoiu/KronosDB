@@ -1,6 +1,12 @@
 #include <iostream>
+#include "engine.hpp"
 
 int main(){
-    std::cout << "Program compiled sucessfuly.\n";
+    
+    std::cout << "Initializing project\n";
+
+    Engine db("Kronos-Core");
+    db.start();
+
     return 0;
 }

@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/andrei/Documents/projects/ChronosDB/engine.cpp" "CMakeFiles/kronos_server.dir/engine.cpp.o" "gcc" "CMakeFiles/kronos_server.dir/engine.cpp.o.d"
   "/home/andrei/Documents/projects/ChronosDB/main.cpp" "CMakeFiles/kronos_server.dir/main.cpp.o" "gcc" "CMakeFiles/kronos_server.dir/main.cpp.o.d"
   "" "kronos_server" "gcc" "CMakeFiles/kronos_server.dir/link.d"
   )

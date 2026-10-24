@@ -129,6 +129,30 @@ kronos_server/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/build
 .PHONY : kronos_server/fast
 
+engine.o: engine.cpp.o
+.PHONY : engine.o
+
+# target to build an object file
+engine.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/engine.cpp.o
+.PHONY : engine.cpp.o
+
+engine.i: engine.cpp.i
+.PHONY : engine.i
+
+# target to preprocess a source file
+engine.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/engine.cpp.i
+.PHONY : engine.cpp.i
+
+engine.s: engine.cpp.s
+.PHONY : engine.s
+
+# target to generate assembly for a file
+engine.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/engine.cpp.s
+.PHONY : engine.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... kronos_server"
+	@echo "... engine.o"
+	@echo "... engine.i"
+	@echo "... engine.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

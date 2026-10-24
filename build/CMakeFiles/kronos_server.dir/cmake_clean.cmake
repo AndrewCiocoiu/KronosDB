@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/kronos_server.dir/link.d"
+  "CMakeFiles/kronos_server.dir/engine.cpp.o"
+  "CMakeFiles/kronos_server.dir/engine.cpp.o.d"
   "CMakeFiles/kronos_server.dir/main.cpp.o"
   "CMakeFiles/kronos_server.dir/main.cpp.o.d"
   "kronos_server"
