@@ -5,7 +5,7 @@
 
 class Engine{
 public:
-    Engine(std::string name);
+    Engine(std::string const & name);
 
     void start();
 private:
