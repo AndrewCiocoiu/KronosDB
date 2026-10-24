@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named kronos_sanity
+# Target rules for targets named kronos_server
 
 # Build rule for target.
-kronos_sanity: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 kronos_sanity
-.PHONY : kronos_sanity
+kronos_server: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 kronos_server
+.PHONY : kronos_server
 
 # fast build rule for target.
-kronos_sanity/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_sanity.dir/build.make CMakeFiles/kronos_sanity.dir/build
-.PHONY : kronos_sanity/fast
+kronos_server/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/build
+.PHONY : kronos_server/fast
 
-tests/test_sanity.o: tests/test_sanity.cpp.o
-.PHONY : tests/test_sanity.o
+main.o: main.cpp.o
+.PHONY : main.o
 
 # target to build an object file
-tests/test_sanity.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_sanity.dir/build.make CMakeFiles/kronos_sanity.dir/tests/test_sanity.cpp.o
-.PHONY : tests/test_sanity.cpp.o
+main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/main.cpp.o
+.PHONY : main.cpp.o
 
-tests/test_sanity.i: tests/test_sanity.cpp.i
-.PHONY : tests/test_sanity.i
+main.i: main.cpp.i
+.PHONY : main.i
 
 # target to preprocess a source file
-tests/test_sanity.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_sanity.dir/build.make CMakeFiles/kronos_sanity.dir/tests/test_sanity.cpp.i
-.PHONY : tests/test_sanity.cpp.i
+main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/main.cpp.i
+.PHONY : main.cpp.i
 
-tests/test_sanity.s: tests/test_sanity.cpp.s
-.PHONY : tests/test_sanity.s
+main.s: main.cpp.s
+.PHONY : main.s
 
 # target to generate assembly for a file
-tests/test_sanity.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_sanity.dir/build.make CMakeFiles/kronos_sanity.dir/tests/test_sanity.cpp.s
-.PHONY : tests/test_sanity.cpp.s
+main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kronos_server.dir/build.make CMakeFiles/kronos_server.dir/main.cpp.s
+.PHONY : main.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... kronos_sanity"
-	@echo "... tests/test_sanity.o"
-	@echo "... tests/test_sanity.i"
-	@echo "... tests/test_sanity.s"
+	@echo "... kronos_server"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
 .PHONY : help
 
 

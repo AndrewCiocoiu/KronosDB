@@ -47,5 +47,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/kronos_sanity.dir/DependInfo.cmake"
+  "CMakeFiles/kronos_server.dir/DependInfo.cmake"
   )

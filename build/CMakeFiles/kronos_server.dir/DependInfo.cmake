@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/andrei/Documents/projects/ChronosDB/tests/test_sanity.cpp" "CMakeFiles/Kronos_sanity.dir/tests/test_sanity.cpp.o" "gcc" "CMakeFiles/Kronos_sanity.dir/tests/test_sanity.cpp.o.d"
-  "" "Kronos_sanity" "gcc" "CMakeFiles/Kronos_sanity.dir/link.d"
+  "/home/andrei/Documents/projects/ChronosDB/main.cpp" "CMakeFiles/kronos_server.dir/main.cpp.o" "gcc" "CMakeFiles/kronos_server.dir/main.cpp.o.d"
+  "" "kronos_server" "gcc" "CMakeFiles/kronos_server.dir/link.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

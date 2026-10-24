@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/andrei/Documents/projects/ChronosDB/include
+CXX_INCLUDES = 
 
-CXX_FLAGS = -std=c++20 -Wall -Wextra -Wpedantic -Werror
+CXX_FLAGS = -std=gnu++20
 

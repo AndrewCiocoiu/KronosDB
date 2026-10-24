@@ -1,5 +1,5 @@
-CMakeFiles/kronos_sanity.dir/tests/test_sanity.cpp.o: \
- /home/andrei/Documents/projects/ChronosDB/tests/test_sanity.cpp \
+CMakeFiles/kronos_server.dir/main.cpp.o: \
+ /home/andrei/Documents/projects/ChronosDB/main.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/15/iostream \
  /usr/include/c++/15/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/15/bits/c++config.h \
