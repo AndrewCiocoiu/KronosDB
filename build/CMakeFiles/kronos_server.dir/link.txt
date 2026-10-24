@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/kronos_server.dir/link.d CMakeFiles/kronos_server.dir/main.cpp.o CMakeFiles/kronos_server.dir/engine.cpp.o -o kronos_server

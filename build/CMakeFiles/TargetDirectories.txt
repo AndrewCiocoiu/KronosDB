@@ -1,3 +1,0 @@
-/home/andrei/Documents/projects/ChronosDB/build/CMakeFiles/kronos_server.dir
-/home/andrei/Documents/projects/ChronosDB/build/CMakeFiles/edit_cache.dir
-/home/andrei/Documents/projects/ChronosDB/build/CMakeFiles/rebuild_cache.dir
