@@ -19,6 +19,7 @@ void Engine::start(){
 void Engine::set(const std::string & key, const std::string & value){
     size_t shard_idx = get_shard_idx(key);
 
+    //since we cannot copy a unique ptr we have to get it as a reference
     auto & current_shard = shards[shard_idx];
 
     std::lock_guard<std::mutex> lock(current_shard->mtx);
