@@ -1,5 +1,17 @@
 #include <iostream>
 #include "engine.hpp"
+#include <string>
+#include <thread>
+
+
+void worker(Engine & db, int worker_id, int op_count){
+    for(int i = 0; i < op_count; ++i){
+        std::string key = "key_" + std::to_string(worker_id) + std::to_string(i);
+        std::string val = "val_" + std::to_string(i);
+
+        db.set(key, val);
+    }
+}
 
 int main(){
     
@@ -8,17 +20,16 @@ int main(){
     Engine db("Kronos-Core");
     db.start();
 
-    db.set("user:101", "Andrei");
 
-    auto res1 = db.get("user:101");
-    //Has value on an optional will check if that optional is not null
-    if(!res1.has_value()){
-        std::cout << "Key user:101 was not found!\n";
-    }
+    const int OPS_PER_THREAD = 50000;
 
-    auto res2 = db.get("user:102");
-    if(!res2.has_value()){
-        std::cout << "Key user:102 was not found!\n";
-    }
-    return 0;
+    //We need to use ref since by default the thread constructor passes everything by value
+    std::thread t1(worker, std::ref(db), 1, OPS_PER_THREAD);
+    std::thread t2(worker, std::ref(db), 2, OPS_PER_THREAD);
+
+    t1.join();
+    t2.join();
+
+
+    std::cout << db.size();
 }
