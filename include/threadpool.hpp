@@ -21,4 +21,5 @@ private:
     std::queue<Task> tasks;
     std::mutex queue_mtx;
     std::condition_variable cv;
+    bool stop = false;
 };
