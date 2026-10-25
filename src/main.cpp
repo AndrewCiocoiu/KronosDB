@@ -92,5 +92,4 @@ int main(){
     }
 
     std::cout << "All workers have shutdown!\n";
-
 }
