@@ -63,32 +63,32 @@ void worker_loop(int id, TaskQueue& q){
     while(q.pop(task)){
         task();
     }
-    std::cout << "Worker " << id << " exited!\n";
+    std::ostringstream ss;
+    ss << "Worker " << id << " exited!\n";
+    std::cout << ss.str();
 }
 
 int main(){
-    TaskQueue q;
-    std::vector<std::thread> workers;
+    {
+        TaskQueue q;
+        std::vector<std::jthread> workers;
 
-    for(int i = 0; i < 2; i++){
-        workers.emplace_back(worker_loop, i, std::ref(q));
-    }
+        for(int i = 0; i < 2; i++){
+            workers.emplace_back(worker_loop, i, std::ref(q));
+        }
 
-    for(int i = 0; i < 6; i++){
-        q.push([i] {
-            std::ostringstream ss;
-            ss << "Executing task " << i << " on Thread " << std::this_thread::get_id() << "\n";
-            std::cout << ss.str();
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        });
-    }
+        for(int i = 0; i < 6; i++){
+            q.push([i] {
+                std::ostringstream ss;
+                ss << "Executing task " << i << " on Thread " << std::this_thread::get_id() << "\n";
+                std::cout << ss.str();
+                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            });
+        }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
-    std::cout << "Shutting down queue\n";
-    q.shutdown();
-
-    for(auto & worker : workers){
-        worker.join();
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
+        std::cout << "Shutting down queue\n";
+        q.shutdown();
     }
 
     std::cout << "All workers have shutdown!\n";
