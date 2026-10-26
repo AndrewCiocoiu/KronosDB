@@ -1,23 +1,34 @@
-#include "threadpool.hpp"
 #include "sstream"
 #include "iostream"
+#include "engine.hpp"
+#include "format"
+#include "threadpool.hpp"
 
 int main(){
-    std::cout << "Intializing threadpool.";
+    std::cout << "Intializing threadpool.\n";
 
+    auto start = std::chrono::high_resolution_clock::now();
     {
+        Engine db("Hello", 20);
         Threadpool pool;
 
-        for(int i = 0; i < 100000; i++){
-            pool.enqueue([i] {
-                std::ostringstream ss;
-                ss << "Task " << i << " running on thread: " << std::this_thread::get_id() << " \n";
-                std::cout << ss.str();
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        
+        
+        for(int i = 0; i < 500; i++){
+            pool.enqueue([&db, i] {
+                for(int i = 0; i < 200; i++){
+                std::ostringstream oss;
+                oss << i << "_" << std::this_thread::get_id();
+                db.set(oss.str(), "dasda");
+                }
             });
         }
         
     }
-    std::cout << "All tasks completed!\n";
+    auto end = std::chrono::high_resolution_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+    std::cout << ms << "\n";
+        
+    
 }
