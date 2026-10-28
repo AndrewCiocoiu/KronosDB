@@ -11,4 +11,5 @@ add_executable(kronos_server
     src/main.cpp 
     src/engine.cpp
     src/threadpool.cpp
+    src/wal.cpp
 )
