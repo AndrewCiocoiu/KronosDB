@@ -1,34 +1,34 @@
-#include "sstream"
-#include "iostream"
-#include "engine.hpp"
-#include "format"
 #include "threadpool.hpp"
+#include "engine.hpp"
+#include <iostream>
 
-int main(){
-    std::cout << "Intializing threadpool.\n";
+int main() {
+    Threadpool pool(4);
+    Engine db("Kronos", 16);
+    db.start();
 
-    auto start = std::chrono::high_resolution_clock::now();
-    {
-        Engine db("Hello", 20);
-        Threadpool pool;
 
-        
-        
-        for(int i = 0; i < 500; i++){
-            pool.enqueue([&db, i] {
-                for(int i = 0; i < 200; i++){
-                std::ostringstream oss;
-                oss << i << "_" << std::this_thread::get_id();
-                db.set(oss.str(), "dasda");
-                }
-            });
+    auto write_future = pool.submit([&db]() {
+        db.set("user:42", "Andrei Ciocoiu");
+    });
+
+    write_future.get();
+
+    auto read_future = pool.submit([&db]() {
+        auto user = db.get("user:42");
+        if(!user.has_value()){
+            std::cout << "User not found";
         }
-        
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-    std::cout << ms << "\n";
-        
-    
+        return user;
+    });
+
+
+    auto result = read_future.get();
+
+    if(result.has_value()){
+        std::cout << result.value() << "\n";
+    }
+
+    return 0;
 }
