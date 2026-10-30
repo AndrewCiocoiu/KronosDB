@@ -67,11 +67,15 @@ std::optional<std::string> Engine::get(const std::string & key){
 }
 
 size_t Engine::size() const {
-    size_t size = 0;
-    for(size_t i = 0; i < shard_count; i++){
-        size += shards[i]->map.size();
+
+    //If a thread calls size while another writes we will have undefined behaviour. So we need to lock.
+    size_t total = 0;
+    for (size_t i = 0; i < shard_count; ++i) {
+        std::lock_guard<std::mutex> lock(shards[i]->mtx);
+        total += shards[i]->map.size();
     }
-    return size;
+    return total;
+
 }
 
 size_t Engine::get_shard_idx(std::string key){
