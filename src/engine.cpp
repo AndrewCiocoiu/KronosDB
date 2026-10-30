@@ -78,7 +78,7 @@ size_t Engine::size() const {
 
 }
 
-size_t Engine::get_shard_idx(std::string key){
+size_t Engine::get_shard_idx(const std::string& key) const{
     size_t hash = std::hash<std::string>{}(key);
     return hash % shard_count;
 }

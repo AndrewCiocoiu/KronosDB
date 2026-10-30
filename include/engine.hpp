@@ -37,6 +37,6 @@ private:
     //mutexes cannot be copied or moved in memory, they are tethered, thats why we have to use pointer
     std::vector<std::unique_ptr<Shard>> shards;
     
-    size_t get_shard_idx(std::string key);
+    size_t get_shard_idx(const std::string& key) const;
 
 };
