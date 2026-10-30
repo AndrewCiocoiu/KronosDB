@@ -4,9 +4,12 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <filesystem>
 
 //By initializing before the body we avoid having to delete the default value to assign a new value
 Engine::Engine(std::string const & name, size_t shard_count) : db_name(name), shard_count(shard_count) {
+    //On windows if the directory does not exist it will crash
+    std::filesystem::create_directories("logs");
     std::string file_name = "logs/" + db_name + ".wal";
     
     wal = std::make_unique<WAL>(file_name);
