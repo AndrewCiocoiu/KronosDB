@@ -30,7 +30,7 @@ private:
     std::unique_ptr<WAL> wal;
 
     struct Shard{
-        std::mutex mtx;
+        mutable std::mutex mtx; //"mutable" allows locking inside const
         std::unordered_map<std::string, std::string> map;
     };
     size_t shard_count;
