@@ -7,9 +7,18 @@
 
 //By initializing before the body we avoid having to delete the default value to assign a new value
 Engine::Engine(std::string const & name, size_t shard_count) : db_name(name), shard_count(shard_count) {
+    std::string file_name = "logs/" + db_name + ".wal";
+    
+    wal = std::make_unique<WAL>(file_name);
+
     for(size_t i = 0; i < shard_count; i++){
         shards.push_back(std::make_unique<Shard>());
     }
+
+    wal->recover([this, &file_name](const std::string& k, const std::string& v){
+        set_memory_only(k, v);
+        std::cout << "Recovered " << k << " " << v << " from " << file_name << "\n";
+    });
 }
 
 void Engine::start(){
@@ -17,6 +26,17 @@ void Engine::start(){
 }
 
 void Engine::set(const std::string & key, const std::string & value){
+    size_t shard_idx = get_shard_idx(key);
+
+    //since we cannot copy a unique ptr we have to get it as a reference
+    auto & current_shard = shards[shard_idx];
+
+    std::lock_guard<std::mutex> lock(current_shard->mtx);
+    wal->append_set(key, value);
+    current_shard->map[key] = value;
+}
+
+void Engine::set_memory_only(const std::string& key, const std::string& value){
     size_t shard_idx = get_shard_idx(key);
 
     //since we cannot copy a unique ptr we have to get it as a reference

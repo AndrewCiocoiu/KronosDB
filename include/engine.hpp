@@ -8,6 +8,7 @@
 #include <optional>
 #include <unordered_map>
 #include <vector>
+#include <wal.hpp>
 
 class Engine{
 public:
@@ -23,6 +24,10 @@ public:
     size_t size() const;
 private:
     std::string db_name;
+
+    void set_memory_only(const std::string& key, const std::string& value);
+
+    std::unique_ptr<WAL> wal;
 
     struct Shard{
         std::mutex mtx;

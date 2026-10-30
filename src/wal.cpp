@@ -1,5 +1,7 @@
 #include "wal.hpp"
 #include <iostream>
+#include <string>
+#include <sstream>
 
 WAL::WAL(const std::string filename)
     : filepath{std::move(filename)}
@@ -18,6 +20,29 @@ void WAL::append_set(const std::string &key, const std::string &value){
 
     //Here I call flush so that we immediatley transfer our data to the OS instead of it living only in the process
     log_file.flush();
+}
+
+void WAL::recover(std::function<void(const std::string& key, const std::string& value)> apply_fn){
+    std::ifstream infile(filepath);
+    if (!infile.is_open()){
+        std::cout << "No existing backup!\n";
+    }
+
+    std::string line;
+    while(std::getline(infile, line)){
+        std::stringstream ss(line);
+        std::string command, key, value;
+
+        ss >> command >> key >> value;
+
+        if(command == "SET"){
+            apply_fn(key, value) ;  
+        } else {
+            std::cout << "Invalid command " << command << " skipping!";
+            continue;
+        }
+
+    }
 }
 
 WAL::~WAL(){
