@@ -1,14 +1,17 @@
 #include "threadpool.hpp"
 #include "engine.hpp"
+#include "wal.hpp"
 #include <iostream>
 
 int main() {
     Threadpool pool(4);
     Engine db("Kronos", 16);
+    WAL wal("test.txt");
     db.start();
 
 
-    auto write_future = pool.submit([&db]() {
+    auto write_future = pool.submit([&db, &wal]() {
+        wal.append_set("user:42", "Andrei Ciocoiu");
         db.set("user:42", "Andrei Ciocoiu");
     });
 

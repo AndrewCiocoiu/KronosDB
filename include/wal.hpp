@@ -8,7 +8,7 @@
 class WAL {
 public:
     //Explicit prevents the cpp compiler from performing implicit type conversions or accidental assignments
-    explicit WAL(const std::string & filename);
+    explicit WAL(const std::string filename);
     ~WAL();
 
     void append_set(const std::string& key, const std::string& value);
