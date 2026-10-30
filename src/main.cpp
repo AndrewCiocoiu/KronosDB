@@ -9,11 +9,10 @@ int main() {
     db.start();
 
 
-    auto write_future = pool.submit([&db]() {
+    pool.submit([&db]() {
         db.set("user:42", "Andrei Ciocoiu");
     });
 
-    write_future.get();
 
     auto read_future = pool.submit([&db]() {
         auto user = db.get("user:42");

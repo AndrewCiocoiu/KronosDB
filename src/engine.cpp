@@ -34,8 +34,9 @@ void Engine::set(const std::string & key, const std::string & value){
     //since we cannot copy a unique ptr we have to get it as a reference
     auto & current_shard = shards[shard_idx];
 
-    std::lock_guard<std::mutex> lock(current_shard->mtx);
+    //We want to write ahead begore locking to prevent latency since writing to disk is very slow and some shards could be reading in the meantime
     wal->append_set(key, value);
+    std::lock_guard<std::mutex> lock(current_shard->mtx);
     current_shard->map[key] = value;
 }
 
