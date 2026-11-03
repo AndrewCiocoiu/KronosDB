@@ -10,7 +10,7 @@ int main() {
 
 
     auto write_future = pool.submit([&db]() {
-        db.set("user:42", "Andrei Ciocoiu");
+        db.set("user:42", "Andrei Ciocoiu\nRole: Systems Engineer");
     });
 
     write_future.get();

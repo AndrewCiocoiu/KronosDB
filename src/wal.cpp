@@ -3,10 +3,15 @@
 #include <string>
 #include <sstream>
 
+enum class WALOp : uint8_t {
+    SET = 1,
+    DEL = 2
+};
+
 WAL::WAL(const std::string filename)
     : filepath{std::move(filename)}
 {
-    log_file.open(filepath, std::ios::app);
+    log_file.open(filepath, std::ios::binary);
 
     if(!log_file.is_open()){
         std::cout << "Could not open log file - " << filepath << "!\n";
@@ -16,7 +21,21 @@ WAL::WAL(const std::string filename)
 void WAL::append_set(const std::string &key, const std::string &value){
     std::lock_guard<std::mutex> lock(mtx);
 
-    log_file << "SET " << key << " " << value << "\n";
+    //We write logs using binary framing so that we dont have to deal with delimiters
+    //1 byte for op type | 4 bytes for key size | size bytes for key chars | 4 bytes for value size | size bytes for valye chars
+    WALOp op = WALOp::SET;
+    log_file.write(reinterpret_cast<char*>(&op), sizeof(WALOp));
+
+    uint32_t key_size = static_cast<uint32_t>(key.size());
+    log_file.write(reinterpret_cast<char*>(&key_size), 4);
+
+    log_file.write(key.data(), key_size);
+
+    uint32_t value_size = static_cast<uint32_t>(value.size());
+    log_file.write(reinterpret_cast<char*>(&value_size), 4);
+
+    log_file.write(value.data(), value_size);
+
 
     //Here I call flush so that we immediatley transfer our data to the OS instead of it living only in the process
     log_file.flush();

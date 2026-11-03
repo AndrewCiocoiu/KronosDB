@@ -18,10 +18,10 @@ Engine::Engine(std::string const & name, size_t shard_count) : db_name(name), sh
         shards.push_back(std::make_unique<Shard>());
     }
 
-    wal->recover([this, &file_name](const std::string& k, const std::string& v){
-        set_memory_only(k, v);
-        std::cout << "Recovered " << k << " " << v << " from " << file_name << "\n";
-    });
+    // wal->recover([this, &file_name](const std::string& k, const std::string& v){
+    //     set_memory_only(k, v);
+    //     std::cout << "Recovered " << k << " " << v << " from " << file_name << "\n";
+    // });
 }
 
 void Engine::start(){
