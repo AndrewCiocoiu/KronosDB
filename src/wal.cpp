@@ -28,12 +28,12 @@ void WAL::append_set(const std::string &key, const std::string &value){
     log_file.write(reinterpret_cast<char*>(&op), sizeof(WALOp));
 
     uint32_t key_size = static_cast<uint32_t>(key.size());
-    log_file.write(reinterpret_cast<char*>(&key_size), 4);
+    log_file.write(reinterpret_cast<char*>(&key_size), sizeof(key_size));
 
     log_file.write(key.data(), key_size);
 
     uint32_t value_size = static_cast<uint32_t>(value.size());
-    log_file.write(reinterpret_cast<char*>(&value_size), 4);
+    log_file.write(reinterpret_cast<char*>(&value_size), sizeof(value_size));
 
     log_file.write(value.data(), value_size);
 
