@@ -8,7 +8,7 @@
 #include <filesystem>
 
 //By initializing before the body we avoid having to delete the default value to assign a new value
-Engine::Engine(std::string const & name, size_t shard_count) : db_name(name), shard_count(shard_count) {
+Engine::Engine(std::string const & name, size_t shard_count, bool should_log) : db_name(name), shard_count(shard_count), logging(should_log) {
     //On windows if the directory does not exist it will crash
     std::filesystem::create_directories("logs");
     std::string file_name = "logs/" + db_name + ".wal";
@@ -43,7 +43,9 @@ void Engine::set(const std::string & key, const std::string & value){
     auto & current_shard = shards[shard_idx];
 
     std::lock_guard<std::mutex> lock(current_shard->mtx);
-    wal->append_set(key, value);
+    if (logging){
+        wal->append_set(key, value);
+    }
     current_shard->map[key] = value;
 }
 
@@ -63,7 +65,9 @@ void Engine::del(const std::string &key){
     auto & current_shard = shards[shard_idx];
 
     std::lock_guard<std::mutex> lock(current_shard->mtx);
-    wal->append_del(key);
+    if (logging){
+        wal->append_del(key);
+    }
     current_shard->map.erase(key);
 }
 
@@ -91,6 +95,10 @@ std::optional<std::string> Engine::get(const std::string & key){
     }
 
     return std::nullopt;
+}
+
+bool Engine::is_logging(){
+    return logging;
 }
 
 size_t Engine::size() const {

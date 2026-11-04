@@ -12,7 +12,7 @@
 
 class Engine{
 public:
-    Engine(std::string const & name, size_t num_shards);
+    Engine(std::string const & name, size_t num_shards, bool should_log = true);
 
     void start();
 
@@ -22,6 +22,8 @@ public:
     void set(const std::string& key, const std::string& value);
 
     void del(const std::string &key);
+
+    bool is_logging();
 
     size_t size() const;
 private:
@@ -42,5 +44,7 @@ private:
     std::vector<std::unique_ptr<Shard>> shards;
     
     size_t get_shard_idx(const std::string& key) const;
+
+    bool logging;
 
 };
