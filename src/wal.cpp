@@ -42,34 +42,42 @@ void WAL::append_set(const std::string &key, const std::string &value){
     log_file.flush();
 }
 
-void WAL::recover(std::function<void(const std::string& key, const std::string& value)> apply_fn){
-   std::ifstream infile(filepath, std::ios::binary);
+void WAL::recover(std::function<void(const std::string& key, const std::string& value)> apply_fn) {
+    std::ifstream infile(filepath, std::ios::binary);
     if (!infile.is_open()) {
         return;
     }
 
-    WALOp op;
-    // read will return a reference to infile which will evaluate to false at EOF
-    while (infile.read(reinterpret_cast<char*>(&op), sizeof(op))) {
+    //if we have had a crash it means we have incomplete memory in our disk so when read attempts to read it it will trigger its
+    //failbit which will make it return false. In this case we want to stop our recovery since it means we have reached garbage data.
 
-        uint32_t key_size;
-        infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size));
+    WALOp op;
+    while (infile.read(reinterpret_cast<char*>(&op), sizeof(op))) {
+        uint32_t key_size = 0;
+        if (!infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size))) {
+            break; // Truncated record, stop recovery
+        }
 
         std::string key;
         key.resize(key_size);
-        infile.read(key.data(), key_size);
+        if (!infile.read(key.data(), key_size)) {
+            break;
+        }
 
-        uint32_t value_size;
-        infile.read(reinterpret_cast<char*>(&value_size), sizeof(value_size));
+        uint32_t value_size = 0;
+        if (!infile.read(reinterpret_cast<char*>(&value_size), sizeof(value_size))) {
+            break;
+        }
 
         std::string value;
         value.resize(value_size);
-        infile.read(value.data(), value_size);
+        if (!infile.read(value.data(), value_size)) {
+            break;
+        }
 
         if (op == WALOp::SET) {
             apply_fn(key, value);
         }
-
     }
 }
 
