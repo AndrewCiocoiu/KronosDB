@@ -28,7 +28,7 @@ int main() {
     auto result = read_future.get();
 
     if(result.has_value()){
-        std::cout << result.value() << "\n";
+        std::cout << "\n" << result.value() << "\n";
     }
 
     return 0;

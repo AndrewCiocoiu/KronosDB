@@ -43,28 +43,33 @@ void WAL::append_set(const std::string &key, const std::string &value){
 }
 
 void WAL::recover(std::function<void(const std::string& key, const std::string& value)> apply_fn){
-    std::ifstream infile(filepath);
-    if (!infile.is_open()){
-        std::cout << "No existing backup!\n";
+   std::ifstream infile(filepath, std::ios::binary);
+    if (!infile.is_open()) {
+        return;
     }
 
-    std::string line;
-    while(std::getline(infile, line)){
-        std::stringstream ss(line);
-        std::string command, key;
-        //Because our values can have spaces in them we want to read the whole rest of the line
-        if (ss >> command >> key) {
-            std::string value;
-            // Skip single delimiter space if present, then read remainder
-            if (ss.peek() == ' ') {
-                ss.ignore();
-            }
-            std::getline(ss, value);
+    WALOp op;
+    // read will return a reference to infile which will evaluate to false at EOF
+    while (infile.read(reinterpret_cast<char*>(&op), sizeof(op))) {
 
-            if (command == "SET") {
-                apply_fn(key, value);
-            }
+        uint32_t key_size;
+        infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size));
+
+        std::string key;
+        key.resize(key_size);
+        infile.read(key.data(), key_size);
+
+        uint32_t value_size;
+        infile.read(reinterpret_cast<char*>(&value_size), sizeof(value_size));
+
+        std::string value;
+        value.resize(value_size);
+        infile.read(value.data(), value_size);
+
+        if (op == WALOp::SET) {
+            apply_fn(key, value);
         }
+
     }
 }
 
