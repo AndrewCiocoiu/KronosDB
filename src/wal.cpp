@@ -11,7 +11,8 @@ enum class WALOp : uint8_t {
 WAL::WAL(const std::string filename)
     : filepath{std::move(filename)}
 {
-    log_file.open(filepath, std::ios::binary);
+    //We need to open in binary append mode so that we dont remove the log file every time we start db (default for binary mode)
+    log_file.open(filepath, std::ios::binary | std::ios::app);
 
     if(!log_file.is_open()){
         std::cout << "Could not open log file - " << filepath << "!\n";

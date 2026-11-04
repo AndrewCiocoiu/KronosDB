@@ -7,11 +7,6 @@
 int main() {
     Threadpool pool(4);
     Engine db("Kronos", 16);
-    BenchmarkDB bench(20);
-    bench.start_benchmark();
-
-    db.start();
-
 
     auto write_future = pool.submit([&db]() {
         db.set("user:42", "Andrei Ciocoiu\nRole: Systems Engineer");
