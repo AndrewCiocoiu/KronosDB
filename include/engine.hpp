@@ -21,11 +21,15 @@ public:
 
     void set(const std::string& key, const std::string& value);
 
+    void del(const std::string &key);
+
     size_t size() const;
 private:
     std::string db_name;
 
     void set_memory_only(const std::string& key, const std::string& value);
+
+    void del_memory_only(const std::string &key);
 
     std::unique_ptr<WAL> wal;
 

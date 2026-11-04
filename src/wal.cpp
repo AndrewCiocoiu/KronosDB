@@ -3,11 +3,6 @@
 #include <string>
 #include <sstream>
 
-enum class WALOp : uint8_t {
-    SET = 1,
-    DEL = 2
-};
-
 WAL::WAL(const std::string filename)
     : filepath{std::move(filename)}
 {
@@ -42,42 +37,75 @@ void WAL::append_set(const std::string &key, const std::string &value){
     log_file.flush();
 }
 
-void WAL::recover(std::function<void(const std::string& key, const std::string& value)> apply_fn) {
+void WAL::append_del(const std::string &key){
+    std::lock_guard<std::mutex> lock(mtx);
+
+    //We write logs using binary framing so that we dont have to deal with delimiters
+    //1 byte for op type | 4 bytes for key size | size bytes for key chars | 4 bytes for value size | size bytes for valye chars
+    WALOp op = WALOp::DEL;
+    log_file.write(reinterpret_cast<char*>(&op), sizeof(WALOp));
+
+    uint32_t key_size = static_cast<uint32_t>(key.size());
+    log_file.write(reinterpret_cast<char*>(&key_size), sizeof(key_size));
+
+    log_file.write(key.data(), key_size);
+
+    log_file.flush();
+}
+
+void WAL::recover(std::function<void(WALOp op, const std::string& key, const std::string& value)> apply_fn) {
     std::ifstream infile(filepath, std::ios::binary);
     if (!infile.is_open()) {
         return;
     }
+
+    std::cout << "Starting recovery process.\n";
 
     //if we have had a crash it means we have incomplete memory in our disk so when read attempts to read it it will trigger its
     //failbit which will make it return false. In this case we want to stop our recovery since it means we have reached garbage data.
 
     WALOp op;
     while (infile.read(reinterpret_cast<char*>(&op), sizeof(op))) {
-        uint32_t key_size = 0;
-        if (!infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size))) {
-            break; // Truncated record, stop recovery
+        if (op == WALOp::SET){
+            uint32_t key_size = 0;
+            if (!infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size))) {
+                break; // Truncated record, stop recovery
+            }
+
+            std::string key;
+            key.resize(key_size);
+            if (!infile.read(key.data(), key_size)) {
+                break;
+            }
+
+            uint32_t value_size = 0;
+            if (!infile.read(reinterpret_cast<char*>(&value_size), sizeof(value_size))) {
+                break;
+            }
+
+            std::string value;
+            value.resize(value_size);
+            if (!infile.read(value.data(), value_size)) {
+                break;
+            }
+
+            apply_fn(WALOp::SET, key, value);
+        } else if (op == WALOp::DEL){
+            uint32_t key_size = 0;
+            if (!infile.read(reinterpret_cast<char*>(&key_size), sizeof(key_size))) {
+                break; // Truncated record, stop recovery
+            }
+
+            std::string key;
+            key.resize(key_size);
+            if (!infile.read(key.data(), key_size)) {
+                break;
+            }
+
+            apply_fn(WALOp::DEL, key, "");
         }
 
-        std::string key;
-        key.resize(key_size);
-        if (!infile.read(key.data(), key_size)) {
-            break;
-        }
-
-        uint32_t value_size = 0;
-        if (!infile.read(reinterpret_cast<char*>(&value_size), sizeof(value_size))) {
-            break;
-        }
-
-        std::string value;
-        value.resize(value_size);
-        if (!infile.read(value.data(), value_size)) {
-            break;
-        }
-
-        if (op == WALOp::SET) {
-            apply_fn(key, value);
-        }
+        
     }
 }
 

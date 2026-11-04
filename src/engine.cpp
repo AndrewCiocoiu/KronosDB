@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include <cstddef>
+#include "wal.hpp"
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -18,9 +19,16 @@ Engine::Engine(std::string const & name, size_t shard_count) : db_name(name), sh
         shards.push_back(std::make_unique<Shard>());
     }
 
-    wal->recover([this, &file_name](const std::string& k, const std::string& v){
-        set_memory_only(k, v);
-        std::cout << "Recovered " << k << " " << v << " from " << file_name << "\n";
+    wal->recover([this, &file_name](WALOp op, const std::string& k, const std::string& v){
+
+        if (op == WALOp::SET) {
+            set_memory_only(k, v);
+            std::cout << "Set " << k << " " << v << " from " << file_name << "\n";
+        } else if (op == WALOp::DEL) {
+            del_memory_only(k);
+            std::cout << "Deleted " << k << " from " << file_name << "\n"; 
+        }
+
     });
 }
 
@@ -47,6 +55,25 @@ void Engine::set_memory_only(const std::string& key, const std::string& value){
 
     std::lock_guard<std::mutex> lock(current_shard->mtx);
     current_shard->map[key] = value;
+}
+
+void Engine::del(const std::string &key){
+    size_t shard_idx = get_shard_idx(key);
+
+    auto & current_shard = shards[shard_idx];
+
+    std::lock_guard<std::mutex> lock(current_shard->mtx);
+    wal->append_del(key);
+    current_shard->map.erase(key);
+}
+
+void Engine::del_memory_only(const std::string &key){
+    size_t shard_idx = get_shard_idx(key);
+
+    auto & current_shard = shards[shard_idx];
+
+    std::lock_guard<std::mutex> lock(current_shard->mtx);
+    current_shard->map.erase(key);
 }
 
 std::optional<std::string> Engine::get(const std::string & key){
