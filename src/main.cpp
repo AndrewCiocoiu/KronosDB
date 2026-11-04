@@ -1,11 +1,15 @@
 #include "threadpool.hpp"
 #include "engine.hpp"
+#include "benchmark.hpp"
 #include "wal.hpp"
 #include <iostream>
 
 int main() {
     Threadpool pool(4);
     Engine db("Kronos", 16);
+    BenchmarkDB bench(20);
+    bench.start_benchmark();
+
     db.start();
 
 
