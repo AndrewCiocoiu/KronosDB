@@ -49,7 +49,6 @@ void Threadpool::enqueue(Task task){
 Threadpool::~Threadpool(){
     {
         std::lock_guard<std::mutex> lock(queue_mtx);
-
         stop = true;
     }
     cv.notify_all();

@@ -148,6 +148,9 @@ void WAL::flusher_loop(){
         batch.swap(queue);
         lock.unlock();
 
+        //We nmever want to do IO operations while we are locked since they are extrmeely slow. While we are writing to disk we want
+        //our other threads to be able to commit logs to the queue which we then instantly swap with our current batch 
+
         for(auto & log : batch){
             if(log.op == WALOp::SET){
                 log_file.write(reinterpret_cast<char*>(&log.op), sizeof(WALOp));
@@ -182,9 +185,18 @@ void WAL::flusher_loop(){
 }
 
 WAL::~WAL(){
-    std::lock_guard<std::mutex> lock(queue_mutex);
-    stop = true;
+    {
+        std::lock_guard<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+
     cv.notify_all();
+
+    //We wait for our writer to finnish writing everythong to the OS before flushing
+    if (flusher_thread.joinable()){
+        flusher_thread.join();
+    }
+
     log_file.flush();
     log_file.close();
 }

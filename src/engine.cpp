@@ -12,12 +12,12 @@ Engine::Engine(std::string const & name, size_t shard_count, bool should_log) : 
     //On windows if the directory does not exist it will crash
     std::filesystem::create_directories("logs");
     std::string file_name = "logs/" + db_name + ".wal";
-    
-    wal = std::make_unique<WAL>(file_name);
 
     for(size_t i = 0; i < shard_count; i++){
         shards.push_back(std::make_unique<Shard>());
     }
+
+    wal = std::make_unique<WAL>(file_name);
 
     wal->recover([this, &file_name](WALOp op, const std::string& k, const std::string& v){
 
