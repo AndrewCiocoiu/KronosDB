@@ -4,10 +4,21 @@
 #include <fstream>
 #include <mutex>
 #include <functional>
+#include <deque>
+#include <future>
+#include <thread>
 
 enum class WALOp : uint8_t {
     SET = 1,
     DEL = 2
+};
+
+//We are going to also store a promise so that we know when the log record has been processed by our permanent group commit thread
+struct LogRecord{
+    WALOp op;
+    std::string key;
+    std::string value;
+    std::promise<bool> promise;
 };
 
 class WAL {
@@ -23,8 +34,17 @@ public:
     //We allow a function to be passed since we want to allow the client to choose what to do with the recovered data on their own
     void recover(std::function<void(WALOp op, const std::string& key, const std::string& value)> apply_fn);
 
+    //This is our permanent group commit thread that continously writes batches of currently appended logs
+    void flusher_loop();
+
 private:
     std::string filepath;
     std::ofstream log_file;
-    std::mutex mtx;
+
+    std::deque<LogRecord> queue;
+    std::mutex queue_mutex;
+    std::condition_variable cv;
+    std::jthread flusher_thread;
+    bool stop{false};
+
 };
