@@ -6,15 +6,12 @@
 WAL::WAL(const std::string filename)
     : filepath{std::move(filename)}
 {
-
-    flusher_thread = std::jthread([this]{ flusher_loop();});
-
-    //We need to open in binary append mode so that we dont remove the log file every time we start db (default for binary mode)
     log_file.open(filepath, std::ios::binary | std::ios::app);
-
-    if(!log_file.is_open()){
-        std::cout << "Could not open log file - " << filepath << "!\n";
+    if (!log_file.is_open()){
+        std::cerr << "Could not open log file - " << filepath << "!\n";
     }
+
+    flusher_thread = std::jthread([this]{ flusher_loop(); });
 }
 
 void WAL::append_set(const std::string &key, const std::string &value){
