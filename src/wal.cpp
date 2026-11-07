@@ -4,7 +4,7 @@
 #include <sstream>
 
 WAL::WAL(const std::string filename)
-    : filepath{std::move(filename)}
+    : filepath{std::move(filename)}, is_writing_batch{false}
 {
     log_file.open(filepath, std::ios::binary | std::ios::app);
     if (!log_file.is_open()){
@@ -145,8 +145,15 @@ void WAL::flusher_loop(){
         batch.swap(queue);
         lock.unlock();
 
+       //This is in order to notify snapshot that is not safe to close the file after making the checkpoint
+        {
+            std::lock_guard<std::mutex> lk(queue_mutex);
+            is_writing_batch = true;
+        }
+
         //We nmever want to do IO operations while we are locked since they are extrmeely slow. While we are writing to disk we want
         //our other threads to be able to commit logs to the queue which we then instantly swap with our current batch 
+
 
         for(auto & log : batch){
             if(log.op == WALOp::SET){
@@ -178,6 +185,12 @@ void WAL::flusher_loop(){
         for(auto & log : batch){
             log.promise.set_value(true);
         }
+
+        {
+            std::lock_guard<std::mutex> lk(queue_mutex);
+            is_writing_batch = false;
+        }
+        cv.notify_all();
     }
 }
 
@@ -196,4 +209,26 @@ WAL::~WAL(){
 
     log_file.flush();
     log_file.close();
+}
+
+void WAL::reset_log(){
+    std::unique_lock<std::mutex> lock(queue_mutex);
+
+    cv.wait(lock, [this]{
+        return queue.empty() && !is_writing_batch;
+    });
+
+    log_file.flush();
+    log_file.close();
+
+    //We truncate the file
+    log_file.open(filepath, std::ios::binary | std::ios::trunc | std::ios::out);
+    log_file.close();
+
+    //We reopen it in append mode so that future writes can write to it
+    log_file.open(filepath, std::ios::binary | std::ios::app);
+
+    if(!log_file.is_open()){
+        std::cerr << "Failed to reopen log file";
+    }
 }

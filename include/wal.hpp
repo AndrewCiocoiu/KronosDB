@@ -47,6 +47,7 @@ private:
     std::deque<LogRecord> queue;
     std::mutex queue_mutex;
     std::condition_variable cv;
+    bool is_writing_batch;
     std::jthread flusher_thread;
     bool stop{false};
 
