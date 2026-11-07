@@ -17,6 +17,36 @@ Engine::Engine(std::string const & name, size_t shard_count, bool should_log) : 
         shards.push_back(std::make_unique<Shard>());
     }
 
+    //Start recovery from snapshot
+    std::ifstream snapshot_file("logs/" + db_name + ".snapshot", std::ios::binary);
+    WALOp op = WALOp::SET;
+    while (snapshot_file.read(reinterpret_cast<char*>(&op), sizeof(op))) {
+        uint32_t key_size = 0;
+        if (!snapshot_file.read(reinterpret_cast<char*>(&key_size), sizeof(key_size))) {
+            break; // Truncated record, stop recovery
+        }
+
+        std::string key;
+        key.resize(key_size);
+        if (!snapshot_file.read(key.data(), key_size)) {
+            break;
+        }
+
+        uint32_t value_size = 0;
+        if (!snapshot_file.read(reinterpret_cast<char*>(&value_size), sizeof(value_size))) {
+            break;
+        }
+
+        std::string value;
+        value.resize(value_size);
+        if (!snapshot_file.read(value.data(), value_size)) {
+            break;
+        }
+
+        set_memory_only(key, value);
+    }
+    snapshot_file.close();
+
     wal = std::make_unique<WAL>(file_name);
 
     wal->recover([this, &file_name](WALOp op, const std::string& k, const std::string& v){
