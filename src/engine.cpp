@@ -67,16 +67,25 @@ void Engine::start(){
 }
 
 void Engine::set(const std::string & key, const std::string & value){
+    
     size_t shard_idx = get_shard_idx(key);
 
     //since we cannot copy a unique ptr we have to get it as a reference
     auto & current_shard = shards[shard_idx];
-
-    std::lock_guard<std::mutex> lock(current_shard->mtx);
-    if (logging){
-        wal->append_set(key, value);
+    //we need to make sure we unlock before calling create checkpoin since create checkpoint will also call lock on the current shard
+    //which will cause a double lock which will cause a deadlock
+    {
+        std::lock_guard<std::mutex> lock(current_shard->mtx);
+        if (logging){
+            wal->append_set(key, value);
+        }
+        current_shard->map[key] = value;
     }
-    current_shard->map[key] = value;
+    //We check if we need to create a checkpoint
+    if (++ops_since_checkpoint >= CHECKPOINT_THRESHOLD) {
+        ops_since_checkpoint = 0;
+        create_checkpoint();
+    }
 }
 
 void Engine::set_memory_only(const std::string& key, const std::string& value){
@@ -93,12 +102,17 @@ void Engine::del(const std::string &key){
     size_t shard_idx = get_shard_idx(key);
 
     auto & current_shard = shards[shard_idx];
-
-    std::lock_guard<std::mutex> lock(current_shard->mtx);
-    if (logging){
-        wal->append_del(key);
+    {
+        std::lock_guard<std::mutex> lock(current_shard->mtx);
+        if (logging){
+            wal->append_del(key);
+        }
+        current_shard->map.erase(key);
     }
-    current_shard->map.erase(key);
+    if (++ops_since_checkpoint >= CHECKPOINT_THRESHOLD) {
+        ops_since_checkpoint = 0;
+        create_checkpoint();
+    }
 }
 
 void Engine::del_memory_only(const std::string &key){

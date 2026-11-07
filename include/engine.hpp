@@ -49,4 +49,9 @@ private:
 
     bool logging;
 
+    //We use these to trigger the snapshot, atomics are extremely efficient hardware level stores tgat also prevent data races, static because it is shared
+    //with all of the class instances and doesnt change at runtime, ensuring zero runtime memory because contexpr forces eval at compile time
+    static constexpr size_t CHECKPOINT_THRESHOLD = 50'000;
+    std::atomic<size_t> ops_since_checkpoint{0};
+
 };

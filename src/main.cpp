@@ -9,7 +9,7 @@ int main() {
     Engine db("Kronos", 16);
 
     BenchmarkDB bench(20);
-    bench.start_benchmark(1000, 1000);
+    bench.start_benchmark();
 
     auto write_future = pool.submit([&db]() {
         db.set("user:42", "Andrei Ciocoiu\nRole: Systems Engineer");
