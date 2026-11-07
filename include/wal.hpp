@@ -37,6 +37,9 @@ public:
     //This is our permanent group commit thread that continously writes batches of currently appended logs
     void flusher_loop();
 
+    //Will reset our log file (will be called by engine when writing its snapshot)
+    void reset_log();
+
 private:
     std::string filepath;
     std::ofstream log_file;

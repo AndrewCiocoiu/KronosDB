@@ -23,6 +23,8 @@ public:
 
     void del(const std::string &key);
 
+    void create_checkpoint();
+
     bool is_logging();
 
     size_t size() const;

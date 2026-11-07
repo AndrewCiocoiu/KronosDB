@@ -117,3 +117,46 @@ size_t Engine::get_shard_idx(const std::string& key) const{
     size_t hash = std::hash<std::string>{}(key);
     return hash % shard_count;
 }
+
+void Engine::create_checkpoint(){
+    std::vector<std::unique_lock<std::mutex>> locks;
+    std::string filepath = "logs/" + db_name + ".snapshot.tmp";
+
+    std::ofstream ofile(filepath, std::ios::binary);
+
+    if(!ofile.is_open()){
+        std::cerr << "Failed to open file";
+        return;
+    }
+
+
+    //We want to go through all or shards and get all of their mutexes so we can lock everything when doing a snapshot, so that we don't
+    //read while somebody is writing on that shard
+    for(const auto & shard : shards){
+        locks.emplace_back(shard->mtx);
+    }
+
+    WALOp op = WALOp::SET;
+
+    for(const auto & shard : shards){
+        for(const auto & [key, value] : shard->map){
+            ofile.write(reinterpret_cast<char*>(&op), sizeof(WALOp));
+
+            uint32_t key_size = static_cast<uint32_t>(key.size());
+            ofile.write(reinterpret_cast<char*>(&key_size), sizeof(key_size));
+
+            ofile.write(key.data(), key_size);
+
+            uint32_t value_size = static_cast<uint32_t>(value.size());
+            ofile.write(reinterpret_cast<char*>(&value_size), sizeof(value_size));
+
+            ofile.write(value.data(), value_size);
+        }
+    }
+    //We need to make sure our file is closed before renaming it
+    ofile.flush();
+    ofile.close();
+
+    std::filesystem::rename("logs/" + db_name + ".snapshot.tmp" ,"logs/" + db_name + ".snapshot");
+    wal->reset_log();
+}
