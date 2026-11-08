@@ -42,8 +42,4 @@ void BenchmarkDB::start_benchmark(int nr_of_jobs, int work_per_job){
     auto end = std::chrono::high_resolution_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-    std::cout << "Benchmark finished in: " << ms << " ms\n";
-    if(db->is_logging()){
-        std::filesystem::remove("logs/Benchmark_DB.wal");
-    }
 }

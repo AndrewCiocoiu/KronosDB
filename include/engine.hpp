@@ -13,6 +13,7 @@
 class Engine{
 public:
     Engine(std::string const & name, size_t num_shards, bool should_log = true);
+    ~Engine();
 
     void start();
 

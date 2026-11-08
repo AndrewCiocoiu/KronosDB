@@ -204,3 +204,7 @@ void Engine::create_checkpoint(){
     std::filesystem::rename("logs/" + db_name + ".snapshot.tmp" ,"logs/" + db_name + ".snapshot");
     wal->reset_log();
 }
+
+Engine::~Engine(){
+    create_checkpoint();
+}
