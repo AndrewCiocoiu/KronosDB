@@ -68,7 +68,7 @@ void Server::start() {
     std::cout << "KronosDB listening on port " << port << "...\n";
 
     while (running) {
-        int n_ready = epoll_wait(epoll_fd, events, MAX_EVENTS, 100); // 100ms timeout to check `running`
+        int n_ready = epoll_wait(epoll_fd, events, MAX_EVENTS, 100); // 100ms to check `running`
         if (n_ready < 0) {
             if (errno == EINTR) continue;
             perror("epoll_wait error");
@@ -111,7 +111,7 @@ void Server::handle_client_data(int client_fd) {
         buffer[bytes_read] = '\0';
         std::string request(buffer, bytes_read);
 
-        // Offload command execution to the threadpool
+        // Send to  threadpool
         pool.enqueue([this, client_fd, req = std::move(request)]() {
             std::string response = process_command(req);
             send(client_fd, response.data(), response.size(), MSG_NOSIGNAL);
@@ -127,7 +127,7 @@ std::string Server::process_command(const std::string& raw_cmd) {
     std::string cmd;
     iss >> cmd;
 
-    // Normalize command to uppercase
+    // Everything uppercase
     for (auto& c : cmd) c = std::toupper(static_cast<unsigned char>(c));
 
     if (cmd == "PING") {
@@ -138,7 +138,6 @@ std::string Server::process_command(const std::string& raw_cmd) {
         std::string value;
         if (iss.peek() == ' ') iss.ignore();
         std::getline(iss, value);
-        // Strip trailing carriage return / newline if present from telnet/nc
         while (!value.empty() && (value.back() == '\r' || value.back() == '\n')) {
             value.pop_back();
         }
