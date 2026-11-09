@@ -1,45 +1,30 @@
-#include "threadpool.hpp"
 #include "engine.hpp"
-#include "benchmark.hpp"
-#include "wal.hpp"
-#include <iostream>
+#include "threadpool.hpp"
+#include "server.hpp"
+#include <csignal>
+#include <memory>
+
+std::unique_ptr<Server> global_server;
+
+void signal_handler(int) {
+    if (global_server) {
+        global_server->stop();
+    }
+}
 
 int main() {
+    std::signal(SIGINT, signal_handler);
+    std::signal(SIGTERM, signal_handler);
+
     Threadpool pool(4);
-    Engine db("Kronos", 16);
+    Engine db("Kronos", 16, true);
+    db.start();
 
-    BenchmarkDB bench(20);
-    bench.start_benchmark();
-
-    auto write_future = pool.submit([&db]() {
-        db.set("user:42", "Andrei Ciocoiu\nRole: Systems Engineer");
-    });
-
-    write_future.get();
-
-
-    auto read_future = pool.submit([&db]() {
-        auto user = db.get("user:42");
-        if(!user.has_value()){
-            std::cout << "User not found";
-        }
-
-        return user;
-    });
-
-    auto result = read_future.get();
-
-    if(result.has_value()){
-        std::cout << "\n" << result.value() << "\n";
+    global_server = std::make_unique<Server>(db, pool, 8081);
+    if (!global_server->init()) {
+        return 1;
     }
 
-    auto del_future = pool.submit([&db]() {
-        db.del("user:42");
-    });
-
-    del_future.get();
-
-
-
+    global_server->start();
     return 0;
 }
