@@ -46,7 +46,6 @@ Designed with an emphasis on low-latency concurrency and crash-resilient durabil
 
 Instead of protecting a single global hash map with one coarse-grained mutex—which serializes all threads under write contention—KronosDB partitions the keyspace across $N$ independent shards (`std::vector<std::unique_ptr<Shard>>`).
 
-* Keys are deterministically routed via $\text{hash}(\text{key}) \pmod{\text{shard\_count}}$.
 * Operations on disjoint shards execute with true hardware parallelism without acquiring shared locks.
 
 ### 2. Custom Asynchronous Thread Pool
